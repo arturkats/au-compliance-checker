@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Does CPS 230 or CPS 234 apply to you? | APRA applicability checker</title>
+<meta name="description" content="Answer a few questions to find out whether APRA's operational risk (CPS 230) and information security (CPS 234) standards apply to your organisation, with paragraph references.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F1F4F2;
+    --surface: #FFFFFF;
+    --ink: #1B2B34;
+    --muted: #5B6B72;
+    --line: #CBD5D1;
+    --gum: #2F5D50;          /* eucalyptus: primary, "applies" */
+    --gum-wash: #D5E8DF;     /* hover-fill */
+    --wattle: #B7791F;       /* caution notes */
+    --wattle-wash: #F7ECD8;
+    --slate-wash: #E3E8EA;   /* "does not apply" */
+    --focus: #1D6FD1;
+    --serif: "Newsreader", Georgia, "Times New Roman", serif;
+    --sans: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    --bg: #12191D;
+    --surface: #1A2328;
+    --ink: #E4EBE8;
+    --muted: #9AA9AF;
+    --line: #33424A;
+    --gum: #7FC4A8;
+    --gum-wash: #24453A;
+    --wattle: #E2B25C;
+    --wattle-wash: #3A2F1C;
+    --slate-wash: #26313A;
+    --focus: #7DB4FF;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-size: 1.0625rem;
+    line-height: 1.55;
+  }
+  a { color: var(--gum); text-underline-offset: 2px; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+  .page { max-width: 46rem; margin: 0 auto; padding: 2.5rem 1.25rem 3rem; }
+
+  header.top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+  h1 {
+    font-family: var(--serif);
+    font-weight: 500;
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    margin: 0 0 0.75rem;
+    max-width: 18ch;
+  }
+  .lede { margin: 0; color: var(--muted); max-width: 38rem; }
+  .theme-toggle {
+    flex: none;
+    font: inherit; font-size: 0.9rem;
+    background: transparent; color: var(--muted);
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 0.35rem 0.8rem; cursor: pointer;
+  }
+
+  .how {
+    margin: 1.75rem 0 0;
+    padding: 0.9rem 1rem;
+    border-left: 3px solid var(--gum);
+    background: var(--surface);
+    border-radius: 0 6px 6px 0;
+    font-size: 0.95rem;
+  }
+  .how p { margin: 0; }
+  .how p + p { margin-top: 0.4rem; color: var(--muted); }
+  .how label { color: var(--ink); }
+  .how select { font: inherit; font-size: 0.9rem; margin-left: 0.25rem; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 0.1rem 0.3rem; }
+
+  /* ---------- The growing path ---------- */
+  .path { position: relative; margin: 2.25rem 0 0; padding: 0 0 0 2rem; list-style: none; }
+  .path::before {
+    content: ""; position: absolute; left: 0.55rem; top: 0.6rem; bottom: 1.5rem;
+    width: 2px; background: var(--line);
+  }
+  .step { position: relative; margin: 0 0 1rem; }
+  .step::before {
+    content: ""; position: absolute; left: -1.75rem; top: 0.55rem;
+    width: 0.8rem; height: 0.8rem; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--gum);
+  }
+  .step.done::before { background: var(--gum); }
+
+  /* Answered steps collapse into a single line you can hover to revisit */
+  .chip {
+    position: relative; overflow: hidden;
+    display: block; width: 100%; text-align: left;
+    font: inherit; color: var(--ink);
+    background: transparent; border: 0; border-radius: 6px;
+    padding: 0.3rem 0.5rem; margin-left: -0.5rem; cursor: pointer;
+  }
+  .chip .q { color: var(--muted); font-size: 0.9rem; display: block; }
+  .chip .a { font-weight: 700; }
+  .chip .revisit { color: var(--muted); font-size: 0.85rem; font-weight: 400; margin-left: 0.4rem; opacity: 0; }
+  .chip:hover .revisit, .chip:focus-visible .revisit { opacity: 1; }
+
+  /* The current question */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 1.4rem 1.4rem 1.2rem;
+  }
+  .card h2 {
+    font-family: var(--serif); font-weight: 500;
+    font-size: 1.55rem; line-height: 1.25; margin: 0 0 0.5rem;
+  }
+  .card h2:focus { outline: none; }
+  .help { margin: 0 0 1.1rem; color: var(--muted); font-size: 0.95rem; }
+  .cite { color: var(--muted); font-size: 0.85rem; margin: 0.9rem 0 0; }
+
+  .options { display: grid; gap: 0.6rem; }
+  .opt {
+    position: relative; overflow: hidden; isolation: isolate;
+    display: block; width: 100%; text-align: left;
+    font: inherit; color: var(--ink);
+    background: var(--bg);
+    border: 1.5px solid var(--line); border-radius: 8px;
+    padding: 0.8rem 1rem; cursor: pointer;
+  }
+  .opt:hover { border-color: var(--gum); }
+  .opt strong { display: block; font-weight: 700; }
+  .opt span.sub { display: block; color: var(--muted); font-size: 0.92rem; margin-top: 0.1rem; }
+  .opt .count { position: absolute; right: 0.9rem; top: 0.8rem; font-size: 0.85rem; color: var(--gum); font-weight: 700; }
+
+  /* The dwell fill: rises left to right while the pointer rests on an option */
+  .dwell::after {
+    content: ""; position: absolute; inset: 0; z-index: -1;
+    background: var(--gum-wash);
+    transform-origin: left center;
+    transform: scaleX(var(--p, 0));
+  }
+  .chip.dwell::after { border-radius: 6px; }
+
+  .controls { display: flex; gap: 0.6rem; margin-top: 1rem; flex-wrap: wrap; }
+  .ctl {
+    position: relative; overflow: hidden; isolation: isolate;
+    font: inherit; font-size: 0.95rem; color: var(--ink);
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px;
+    padding: 0.45rem 1.1rem; cursor: pointer;
+  }
+  .ctl:disabled { opacity: 0.45; cursor: default; }
+  .ctl.reset { color: var(--muted); }
+
+  /* ---------- Results ---------- */
+  .result-head { font-family: var(--serif); font-weight: 500; font-size: 1.9rem; line-height: 1.2; margin: 0 0 0.4rem; }
+  .verdicts { display: grid; gap: 1rem; margin-top: 1.2rem; }
+  .verdict {
+    background: var(--surface); border: 1px solid var(--line);
+    border-top: 5px solid var(--gum); border-radius: 10px;
+    padding: 1.2rem 1.3rem;
+  }
+  .verdict.indirect { border-top-color: var(--wattle); }
+  .verdict.no { border-top-color: var(--muted); }
+  .verdict h3 { font-family: var(--serif); font-weight: 600; font-size: 1.35rem; margin: 0; }
+  .verdict .std { color: var(--muted); font-size: 0.92rem; margin: 0.1rem 0 0.6rem; }
+  .verdict .status {
+    display: inline-block; font-weight: 700; font-size: 0.95rem;
+    padding: 0.15rem 0.6rem; border-radius: 4px; margin-bottom: 0.6rem;
+    background: var(--gum-wash); color: var(--ink);
+  }
+  .verdict.indirect .status { background: var(--wattle-wash); }
+  .verdict.no .status { background: var(--slate-wash); }
+  .verdict ul { margin: 0.4rem 0 0; padding-left: 1.2rem; }
+  .verdict li { margin: 0.25rem 0; }
+  .ref { color: var(--muted); font-size: 0.88rem; white-space: nowrap; }
+  .note {
+    margin-top: 0.8rem; padding: 0.6rem 0.8rem;
+    background: var(--wattle-wash); border-radius: 6px; font-size: 0.95rem;
+  }
+  details { margin-top: 0.9rem; border-top: 1px solid var(--line); padding-top: 0.6rem; }
+  summary { cursor: pointer; font-weight: 700; }
+  details h4 { font-size: 1rem; margin: 0.9rem 0 0.2rem; }
+  details p { margin: 0.2rem 0; }
+
+  /* Defined terms: hover or focus to read the definition */
+  .term {
+    font: inherit; color: inherit; background: none; border: 0; padding: 0;
+    border-bottom: 1.5px dotted var(--gum); cursor: help; position: relative;
+  }
+  .term .tip {
+    position: absolute; left: 0; top: calc(100% + 6px); z-index: 10;
+    width: min(22rem, 80vw); padding: 0.6rem 0.75rem;
+    background: var(--ink); color: var(--bg);
+    font-family: var(--sans); font-size: 0.88rem; font-weight: 400; line-height: 1.45; text-align: left;
+    border-radius: 6px; visibility: hidden; opacity: 0;
+  }
+  .term:hover .tip, .term:focus .tip { visibility: visible; opacity: 1; }
+
+  footer { margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.88rem; }
+  footer p { margin: 0.35rem 0; }
+
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .term .tip { transition: opacity 120ms ease; }
+    .card.enter { animation: grow 260ms ease-out; }
+    @keyframes grow { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+  }
+  .touch-only { display: none; }
+  @media (hover: none) {
+    .pointer-only { display: none; }
+    .touch-only { display: block; }
+  }
+  @media (max-width: 30rem) {
+    header.top { flex-direction: column-reverse; gap: 0.75rem; }
+    .theme-toggle { align-self: flex-end; }
+    .page { padding-top: 1.5rem; }
+    .path { padding-left: 1.5rem; }
+    .step::before { left: -1.35rem; }
+    .path::before { left: 0.35rem; }
+    .card { padding: 1.1rem 1rem 1rem; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="top">
+    <div>
+      <h1>Does CPS 230 or CPS 234 apply to you?</h1>
+      <p class="lede">Answer a few questions about your organisation. You'll see whether APRA's operational risk standard (CPS 230) and information security standard (CPS 234) apply, which paragraphs decide it, and what they require.</p>
+    </div>
+    <button class="theme-toggle" id="theme" type="button" aria-pressed="false">Dark mode</button>
+  </header>
+
+  <div class="how">
+    <p class="pointer-only">Rest your pointer on an answer and it fills up. When it's full, it's chosen. Rest on <em>Previous</em> for 2 seconds to go back. You can also click or use the keyboard.</p>
+    <p class="touch-only">Tap an answer to choose it. Tap an underlined term to read its definition.</p>
+    <p class="pointer-only"><label for="speed">Hover time</label>
+      <select id="speed">
+        <option value="5000" selected>5 seconds</option>
+        <option value="3000">3 seconds</option>
+        <option value="0">Off (click only)</option>
+      </select></p>
+  </div>
+
+  <ol class="path" id="path" aria-label="Your answers so far"></ol>
+  <div class="sr" aria-live="polite" id="live"></div>
+
+  <footer>
+    <p>Educational tool, not legal advice. Confirm your position with the standards themselves, APRA's guidance or a qualified adviser.</p>
+    <p>Sources: <a href="https://www.legislation.gov.au/F2026L00475/latest/text">Prudential Standard CPS 230 Operational Risk Management (July 2026, F2026L00475)</a> and <a href="https://www.legislation.gov.au/F2018L01745/latest/text">Prudential Standard CPS 234 Information Security (July 2019, F2018L01745)</a>. Paragraph numbers follow these versions.</p>
+    <p>Built by Artur Kats. Coming next: Privacy Act, Essential Eight, ISO/IEC 27001, ISO 31000, NIST CSF 2.0 and PCI DSS.</p>
+  </footer>
+</div>
+
+<script>
+(() => {
+  "use strict";
+
+  /* ---------------- Settings ---------------- */
+  let SELECT_MS = 5000;   // hover time to choose an answer
+  const BACK_MS = 2000;   // hover time for Previous and for revisiting an answer
+
+  /* ---------------- Defined terms ---------------- */
+  const TERMS = {
+    "APRA-regulated": "Organisations supervised by the Australian Prudential Regulation Authority: banks and other ADIs, general, life and private health insurers, superannuation trustees, and their authorised holding companies. CPS 230 para 2; CPS 234 para 2.",
+    "ADI": "Authorised deposit-taking institution: a bank, credit union or building society authorised under the Banking Act 1959.",
+    "NOHC": "Non-operating holding company: a parent company, authorised or registered by APRA, that owns a bank or insurer but doesn't itself take deposits or write insurance.",
+    "foreign ADI": "An overseas bank authorised to carry on banking business in Australia through a branch, rather than through an Australian subsidiary.",
+    "Category C insurer": "An overseas general insurer authorised to carry on insurance business in Australia through a branch.",
+    "EFLIC": "Eligible foreign life insurance company: an overseas life insurer registered to operate in Australia through a branch.",
+    "RSE licensee": "Registrable superannuation entity licensee: the trustee that runs a regulated super fund, licensed under the SIS Act.",
+    "Head of a group": "The parent APRA-regulated entity of a Level 2 group (a banking or general insurance group) or a Level 3 group (a conglomerate group), as defined in CPS 001. For CPS 230, 'group' also covers a super trustee's connected entities and related bodies corporate (footnote 3).",
+    "material service provider": "A service provider your client relies on to undertake a critical operation, or one that exposes it to material operational risk. CPS 230 para 48. Examples in para 49 include core technology services, fund administration, claims management, risk management and internal audit.",
+    "information assets": "Information and information technology, including software, hardware and data, in soft and hard copy. CPS 234 para 12."
+  };
+  const term = (key, label) =>
+    `<button type="button" class="term" aria-describedby="tip-${slug(key)}">${label || key}<span class="tip" role="tooltip" id="tip-${slug(key)}">${TERMS[key]}</span></button>`;
+  const slug = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+
+  /* ---------------- Questions ---------------- */
+  const SECTOR = {
+    bank: { label: "Bank, credit union or building society", letter: "(a)", foreignQ: "foreignBank" },
+    gi:   { label: "General insurer", letter: "(b)", foreignQ: "foreignGI" },
+    life: { label: "Life insurer or friendly society", letter: "(c)", foreignQ: "foreignLife" },
+    phi:  { label: "Private health insurer", letter: "(d)" },
+    rse:  { label: "Superannuation trustee", letter: "(e)" }
+  };
+
+  const Q = {
+    sector: {
+      short: "Type of organisation",
+      title: () => `Is your organisation ${term("APRA-regulated", "regulated by APRA")}? If so, which kind?`,
+      help: () => `Holding companies count with their sector. Point at or tap the underlined terms for definitions: ${term("ADI")}, ${term("NOHC")}, ${term("RSE licensee")}.`,
+      cite: "CPS 230 para 2 and CPS 234 para 2 list the organisations covered.",
+      options: [
+        { v: "bank", t: "Bank, credit union or building society", s: "An ADI, including a foreign ADI, or a banking holding company (NOHC)" },
+        { v: "gi",   t: "General insurer", s: "Including Category C insurers, insurance holding companies and parents of Level 2 insurance groups" },
+        { v: "life", t: "Life insurer or friendly society", s: "Including EFLICs and registered life holding companies" },
+        { v: "phi",  t: "Private health insurer", s: "Registered under the PHIPS Act" },
+        { v: "rse",  t: "Superannuation trustee", s: "The RSE licensee of a regulated super fund" },
+        { v: "none", t: "None of these", s: "Or you're not sure. We'll check whether the standards reach you another way." }
+      ]
+    },
+    foreignBank: {
+      short: "Foreign bank branch",
+      title: () => `Is it a ${term("foreign ADI")}, operating in Australia through a branch?`,
+      cite: "CPS 230 para 3 and CPS 234 para 3.",
+      options: [
+        { v: "yes", t: "Yes, an Australian branch of an overseas bank" },
+        { v: "no",  t: "No, it's an Australian-incorporated organisation" }
+      ]
+    },
+    foreignGI: {
+      short: "Foreign insurer branch",
+      title: () => `Is it a ${term("Category C insurer")}, operating in Australia through a branch?`,
+      cite: "CPS 230 para 3 and CPS 234 para 3.",
+      options: [
+        { v: "yes", t: "Yes, an Australian branch of an overseas insurer" },
+        { v: "no",  t: "No, it's an Australian-incorporated organisation" }
+      ]
+    },
+    foreignLife: {
+      short: "Foreign life insurer branch",
+      title: () => `Is it an ${term("EFLIC")}, operating in Australia through a branch?`,
+      cite: "CPS 230 para 3 and CPS 234 para 3.",
+      options: [
+        { v: "yes", t: "Yes, an Australian branch of an overseas life insurer" },
+        { v: "no",  t: "No, it's an Australian-incorporated organisation" }
+      ]
+    },
+    group: {
+      short: "Head of a group",
+      title: () => `Is your organisation the ${term("Head of a group")}?`,
+      help: "That is, the parent APRA-regulated entity of a group of companies.",
+      cite: "CPS 230 paras 4–5 and footnote 3; CPS 234 paras 4–5.",
+      options: [
+        { v: "yes", t: "Yes" },
+        { v: "no", t: "No" },
+        { v: "unsure", t: "Not sure" }
+      ]
+    },
+    adjust: {
+      short: "APRA adjustment",
+      title: () => "Has APRA given your organisation a written adjustment or exclusion for either standard?",
+      help: "APRA can adjust or exclude specific requirements for an individual organisation, in writing.",
+      cite: "CPS 230 paras 9–10; CPS 234 paras 10–11.",
+      options: [
+        { v: "no", t: "No" },
+        { v: "yes", t: "Yes" },
+        { v: "unsure", t: "Not sure" }
+      ]
+    },
+    provider: {
+      short: "Services to APRA-regulated clients",
+      title: () => "Do you provide services to a bank, insurer or super fund regulated by APRA?",
+      help: () => `The standards don't bind service providers directly, but they shape the contracts they sign. Point at or tap to see what makes a ${term("material service provider")}.`,
+      cite: "CPS 230 paras 46–61; CPS 234 paras 16, 22 and 28.",
+      options: [
+        { v: "material", t: "Yes, services it relies on for important operations", s: "For example core technology, fund administration or claims handling" },
+        { v: "minor", t: "Yes, but nothing it depends on heavily", s: "For example stationery, catering or one-off consulting" },
+        { v: "no", t: "No" }
+      ]
+    },
+    exemptCat: {
+      short: "Exempt provider category",
+      title: () => "Is your organisation one of these?",
+      help: "Government agency, regulator, central bank, financial market exchange, clearing and settlement facility, payment system operator, or financial messaging infrastructure (such as a SuperStream gateway).",
+      cite: "CPS 230 para 57 and its Attachment, added in July 2026.",
+      options: [
+        { v: "no", t: "No" },
+        { v: "yes", t: "Yes, one of these" }
+      ]
+    },
+    data: {
+      short: "Handles client data or IT",
+      title: () => `Do you store, process or manage your client's ${term("information assets")}?`,
+      help: "For example hosting its data, running its systems or supporting its IT.",
+      cite: "CPS 234 paras 16, 20, 22 and 28.",
+      options: [
+        { v: "yes", t: "Yes" },
+        { v: "no", t: "No" }
+      ]
+    }
+  };
+
+  /* The order of questions depends on earlier answers */
+  function nextQuestion(a) {
+    if (!("sector" in a)) return "sector";
+    if (a.sector === "none") {
+      if (!("provider" in a)) return "provider";
+      if (a.provider === "no") return null;
+      if (a.provider === "material" && !("exemptCat" in a)) return "exemptCat";
+      if (!("data" in a)) return "data";
+      return null;
+    }
+    const fq = SECTOR[a.sector].foreignQ;
+    if (fq && !(fq in a)) return fq;
+    const foreign = fq && a[fq] === "yes";
+    if (!foreign && !("group" in a)) return "group";
+    if (!("adjust" in a)) return "adjust";
+    return null;
+  }
+
+  /* ---------------- State ---------------- */
+  let history = [];   // [{q, v}]
+  const answers = () => Object.fromEntries(history.map(h => [h.q, h.v]));
+
+  /* ---------------- Rendering ---------------- */
+  const path = document.getElementById("path");
+  const live = document.getElementById("live");
+  const txt = v => (typeof v === "function" ? v() : v || "");
+  const plain = html => { const d = document.createElement("div"); d.innerHTML = html; d.querySelectorAll(".tip").forEach(t => t.remove()); return d.textContent; };
+
+  function render() {
+    const a = answers();
+    const qid = nextQuestion(a);
+    let html = "";
+
+    history.forEach((h, i) => {
+      const opt = Q[h.q].options.find(o => o.v === h.v);
+      html += `<li class="step done"><button type="button" class="chip" data-back="${i}" data-dwell="${BACK_MS}">
+        <span class="q">${Q[h.q].short}</span><span class="a">${opt.t}</span><span class="revisit">Change this answer</span></button></li>`;
+    });
+
+    if (qid) {
+      const q = Q[qid];
+      html += `<li class="step"><section class="card enter" aria-labelledby="qh">
+        <h2 id="qh" tabindex="-1">${txt(q.title)}</h2>
+        ${q.help ? `<p class="help">${txt(q.help)}</p>` : ""}
+        <div class="options" role="group" aria-labelledby="qh">
+          ${q.options.map(o => `<button type="button" class="opt" data-q="${qid}" data-v="${o.v}" data-dwell="select">
+              <strong>${o.t}</strong>${o.s ? `<span class="sub">${txt(o.s)}</span>` : ""}<span class="count" aria-hidden="true"></span>
+            </button>`).join("")}
+        </div>
+        <p class="cite">${q.cite}</p>
+        <div class="controls">
+          <button type="button" class="ctl" data-prev data-dwell="${BACK_MS}" ${history.length ? "" : "disabled"}>Previous</button>
+          <button type="button" class="ctl reset" data-reset ${history.length ? "" : "disabled"}>Start again</button>
+        </div>
+      </section></li>`;
+      path.innerHTML = html;
+      live.textContent = plain(txt(q.title));
+    } else {
+      html += `<li class="step">${resultHTML(a)}
+        <div class="controls">
+          <button type="button" class="ctl" data-prev data-dwell="${BACK_MS}">Previous</button>
+          <button type="button" class="ctl reset" data-reset>Start again</button>
+        </div></li>`;
+      path.innerHTML = html;
+      live.textContent = "Result ready.";
+    }
+    const h = document.getElementById("qh") || document.getElementById("rh");
+    if (h && history.length) h.focus({ preventScroll: true });
+    const current = path.lastElementChild;
+    if (current && history.length) current.scrollIntoView({ block: "nearest", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  }
+
+  /* ---------------- Results ---------------- */
+  const li = (text, ref) => `<li>${text}${ref ? ` <span class="ref">${ref}</span>` : ""}</li>`;
+
+  const MIN_CRITICAL = {
+    bank: "payments, deposit-taking and management, custody, settlements and clearing",
+    gi: "claims processing", life: "claims processing", phi: "claims processing",
+    rse: "investment management and fund administration"
+  };
+  const MIN_MSP = {
+    bank: "credit assessment, funding and liquidity management, and mortgage brokerage",
+    gi: "underwriting, claims management, insurance brokerage and reinsurance",
+    life: "underwriting, claims management, insurance brokerage and reinsurance",
+    phi: "underwriting, claims management, insurance brokerage and reinsurance",
+    rse: "fund administration, custodial services, investment management, and arrangements with promoters and financial planners"
+  };
+
+  function obligations230(sector) {
+    return `<details><summary>What CPS 230 requires</summary>
+      <h4>Governance <span class="ref">paras 15–22</span></h4>
+      <p>The Board is ultimately accountable for operational risk, and approves the business continuity plan, tolerance levels and the service provider management policy.</p>
+      <h4>Operational risk <span class="ref">paras 23–32</span></h4>
+      <ul>
+        ${li("Manage the full range of operational risks, including legal, compliance, technology, data and change risk.", "para 23")}
+        ${li("Meet CPS 234 for information security, and monitor the age and health of information assets.", "para 24")}
+        ${li("Test controls for design and operating effectiveness, and fix gaps in a timely manner.", "paras 28–30")}
+        ${li("Notify APRA within 72 hours of an operational risk incident likely to have a material impact.", "para 32")}
+      </ul>
+      <h4>Business continuity <span class="ref">paras 33–45</span></h4>
+      <ul>
+        ${li(`Keep a register of critical operations. At a minimum: ${MIN_CRITICAL[sector]}, plus customer enquiries and the systems that support critical operations.`, "paras 33, 35")}
+        ${li("Set tolerance levels for each: the longest acceptable outage, the most data loss accepted, and minimum service levels.", "para 37")}
+        ${li("Notify APRA within 24 hours of a disruption to a critical operation outside tolerance.", "para 41")}
+        ${li("Run an annual business continuity exercise with severe but plausible scenarios.", "paras 42–43")}
+      </ul>
+      <h4>Service providers <span class="ref">paras 46–61</span></h4>
+      <ul>
+        ${li("Maintain a service provider management policy, including risks from fourth parties.", "paras 46–47")}
+        ${li(`Keep a register of material service providers and submit it to APRA every year. At a minimum: ${MIN_MSP[sector]}, plus risk management, core technology services and internal audit.`, "paras 48–50")}
+        ${li("Carry out due diligence, then sign a formal agreement with the required clauses, including subcontracting, force majeure, termination and APRA access.", "paras 52–54")}
+        ${li("Notify APRA within 20 business days of a new or changed agreement for a critical operation, and before any material offshoring.", "para 60")}
+        ${li("Internal audit reviews proposed outsourcing of critical operations.", "para 61")}
+      </ul>
+    </details>`;
+  }
+
+  function obligations234() {
+    return `<details><summary>What CPS 234 requires</summary>
+      <ul>
+        ${li("The Board must ensure information security is maintained in line with the threats the organisation faces.", "para 13")}
+        ${li("Maintain an information security capability, and assess the capability of third parties that manage your information assets.", "paras 15–17")}
+        ${li("Classify information assets, including those held by third parties, by criticality and sensitivity.", "para 20")}
+        ${li("Implement controls, and evaluate the design of third parties' controls.", "paras 21–22")}
+        ${li("Maintain incident response plans and test them every year.", "paras 23–26")}
+        ${li("Run a systematic control-testing program, carried out by skilled, independent specialists.", "paras 27–31")}
+        ${li("Internal audit reviews information security controls, including those of third parties.", "paras 32–34")}
+        ${li("Notify APRA within 72 hours of a material information security incident, and within 10 business days of a material control weakness you can't fix in time.", "paras 35–36")}
+      </ul>
+    </details>`;
+  }
+
+  function resultHTML(a) {
+    if (a.sector !== "none") return regulatedResult(a);
+    return providerResult(a);
+  }
+
+  function regulatedResult(a) {
+    const s = SECTOR[a.sector];
+    const fq = s.foreignQ;
+    const foreign = fq && a[fq] === "yes";
+    const scope = foreign ? "your Australian branch operations only" : "your whole organisation";
+
+    const groupNotes230 = [], groupNotes234 = [];
+    if (a.group === "yes") {
+      groupNotes230.push(li("As Head of a group, you must comply in your own right, make sure each requirement is applied throughout the group, including companies APRA doesn't regulate, and comply on a group basis.", "paras 4–5"));
+      if (a.sector === "rse") {
+        groupNotes234.push(li("CPS 234's group rules cover only Level 2 and Level 3 groups. A super trustee's corporate group usually isn't one, so CPS 234 normally applies to the trustee itself, not on a group basis.", "paras 4–5"));
+      } else {
+        groupNotes234.push(li("As Head of a Level 2 or Level 3 group, the same group-wide duty applies to CPS 234.", "paras 4–5"));
+      }
+    }
+    const caution = [];
+    if (a.group === "unsure") caution.push("Check whether you're a Level 2 or Level 3 Head (defined in CPS 001). If you are, both standards must also be applied across your group.");
+    if (a.adjust === "yes") caution.push("APRA has adjusted or excluded some requirements for you. Read your written notice alongside this result.");
+    if (a.adjust === "unsure") caution.push("Check with your compliance team whether APRA has issued a written adjustment or exclusion for your organisation.");
+
+    return `<section aria-labelledby="rh">
+      <h2 class="result-head" id="rh" tabindex="-1">Both standards apply to ${scope}.</h2>
+      <p class="help">Here's the reasoning, paragraph by paragraph, and a summary of what each standard asks of you.</p>
+      <div class="verdicts">
+        <article class="verdict">
+          <h3>CPS 230</h3><p class="std">Operational Risk Management, July 2026</p>
+          <span class="status">Applies</span>
+          <ul>
+            ${li(`You're an APRA-regulated entity: ${s.label.toLowerCase()}.`, `para 2${s.letter}`)}
+            ${foreign ? li("As a foreign branch, the obligations apply only to your Australian branch operations.", "para 3") : ""}
+            ${groupNotes230.join("")}
+            ${li("The current version has applied since 1 July 2026.", "para 6")}
+          </ul>
+          ${obligations230(a.sector)}
+        </article>
+        <article class="verdict">
+          <h3>CPS 234</h3><p class="std">Information Security, July 2019</p>
+          <span class="status">Applies</span>
+          <ul>
+            ${li(`You're an APRA-regulated entity: ${s.label.toLowerCase()}.`, `para 2${s.letter}`)}
+            ${foreign ? li("As a foreign branch, the obligations apply only to your Australian branch operations.", "para 3") : ""}
+            ${groupNotes234.join("")}
+            ${li("CPS 230 also requires you to meet CPS 234. An incident you report to APRA under CPS 234 doesn't need a separate CPS 230 report.", "CPS 230 para 24, fn 11")}
+          </ul>
+          ${obligations234()}
+        </article>
+      </div>
+      ${caution.map(c => `<p class="note">${c}</p>`).join("")}
+    </section>`;
+  }
+
+  function providerResult(a) {
+    if (a.provider === "no") {
+      return `<section aria-labelledby="rh">
+        <h2 class="result-head" id="rh" tabindex="-1">Neither standard applies to you.</h2>
+        <p class="help">CPS 230 and CPS 234 apply only to APRA-regulated organisations, and you don't provide services to one.</p>
+        <div class="verdicts">
+          <article class="verdict no"><h3>CPS 230</h3><p class="std">Operational Risk Management</p><span class="status">Doesn't apply</span>
+            <ul>${li("You're not one of the organisations it covers.", "para 2")}</ul></article>
+          <article class="verdict no"><h3>CPS 234</h3><p class="std">Information Security</p><span class="status">Doesn't apply</span>
+            <ul>${li("You're not one of the organisations it covers.", "para 2")}</ul></article>
+        </div>
+        <p class="note">Other rules may still apply, such as the Privacy Act 1988, PCI DSS if you take card payments, and the Essential Eight as a security baseline. They're coming to this checker next.</p>
+      </section>`;
+    }
+
+    const material = a.provider === "material";
+    const exempt = material && a.exemptCat === "yes";
+    let c230;
+    if (material && !exempt) {
+      c230 = `<article class="verdict indirect"><h3>CPS 230</h3><p class="std">Operational Risk Management</p>
+        <span class="status">Reaches you through the contract</span>
+        <p>You're not bound by CPS 230. But as a likely material service provider, your client must build its requirements into how it chooses and manages you. Expect:</p>
+        <ul>
+          ${li("Due diligence before signing, including your ability to deliver the service over time and any concentration or location risk.", "para 52")}
+          ${li("A formal agreement covering service levels, data ownership, audit access, liability, notice of your own key subcontractors, your responsibility for their failures, force majeure and termination rights.", "para 53")}
+          ${li("Clauses giving APRA access to your documents and data, and the right to visit your premises.", "para 54")}
+          ${li("Your client planning how to exit the arrangement, and testing scenarios where your service is disrupted.", "paras 43, 55")}
+          ${li("Regular monitoring of your performance, controls and compliance with the agreement.", "para 59")}
+          ${li("Your client notifying APRA within 20 business days of signing, and before signing if you'd deliver the service from overseas.", "para 60")}
+          ${li("You may appear on the register of material service providers your client submits to APRA every year.", "para 50")}
+        </ul></article>`;
+    } else if (exempt) {
+      c230 = `<article class="verdict indirect"><h3>CPS 230</h3><p class="std">Operational Risk Management</p>
+        <span class="status">Lighter contract requirements</span>
+        <p>Your category is listed in the Attachment to CPS 230. If your client uses your standard terms, or has no formal agreement with you, it doesn't need the usual contract clauses, exit planning or some monitoring steps for this arrangement.</p>
+        <ul>
+          ${li("Exempted: paras 53, 54, 55(d), 59(a) and 59(c).", "para 57")}
+          ${li("Still applies to your client: due diligence, managing risks from the arrangement, business continuity and monitoring of controls.", "paras 52, 55(a)–(c), 59(b)")}
+          ${li("Where these conditions aren't met, APRA can grant an exemption by written notice.", "para 58")}
+        </ul></article>`;
+    } else {
+      c230 = `<article class="verdict no"><h3>CPS 230</h3><p class="std">Operational Risk Management</p>
+        <span class="status">Little or no impact</span>
+        <p>You're not bound by CPS 230. If your client doesn't rely on you for a critical operation, you're unlikely to fall within its material service provider rules. Your client may still ask about your reliability in its normal supplier checks.</p>
+        <ul>${li("Material service providers are defined by reliance and risk.", "para 48")}</ul></article>`;
+    }
+
+    const c234 = a.data === "yes"
+      ? `<article class="verdict indirect"><h3>CPS 234</h3><p class="std">Information Security</p>
+          <span class="status">Reaches you through the contract</span>
+          <p>Because you manage your client's information assets, it must check your security. Expect security questionnaires, evidence requests and audit rights:</p>
+          <ul>
+            ${li("Your client assesses your information security capability.", "para 16")}
+            ${li("It classifies the information you hold for it by criticality and sensitivity.", "para 20")}
+            ${li("It evaluates the design of your security controls.", "para 22")}
+            ${li("It checks whether your own control testing is frequent and thorough enough.", "para 28")}
+            ${li("Its internal audit function may assess the assurance you provide.", "para 34")}
+          </ul></article>`
+      : `<article class="verdict no"><h3>CPS 234</h3><p class="std">Information Security</p>
+          <span class="status">Little or no impact</span>
+          <p>You don't manage your client's information assets, so its CPS 234 duties toward third parties are unlikely to reach you.</p>
+          <ul>${li("Third-party duties attach to information assets a third party manages.", "paras 16, 22")}</ul></article>`;
+
+    const heading = (material && !exempt) || a.data === "yes"
+      ? "Neither standard binds you, but your client's obligations reach you."
+      : "Neither standard binds you, and the impact on you is small.";
+
+    return `<section aria-labelledby="rh">
+      <h2 class="result-head" id="rh" tabindex="-1">${heading}</h2>
+      <p class="help">CPS 230 and CPS 234 apply only to APRA-regulated organisations (para 2 of each). Service providers are affected through the contracts and checks their clients must put in place.</p>
+      <div class="verdicts">${c230}${c234}</div>
+    </section>`;
+  }
+
+  /* ---------------- Actions ---------------- */
+  function choose(q, v) { history.push({ q, v }); render(); }
+  function goBack() { if (history.length) { history.pop(); render(); } }
+  function backTo(i) { history = history.slice(0, i); render(); }
+  function reset() { history = []; render(); document.getElementById("path").scrollIntoView({ block: "start" }); }
+
+  function activate(el) {
+    if (el.matches(".opt")) choose(el.dataset.q, el.dataset.v);
+    else if (el.hasAttribute("data-prev")) goBack();
+    else if (el.hasAttribute("data-back")) backTo(+el.dataset.back);
+  }
+
+  /* Clicks, taps and keyboard (Enter/Space on buttons fire click) */
+  path.addEventListener("click", e => {
+    if (e.target.closest(".term")) return;           // reading a definition never chooses an answer
+    const el = e.target.closest(".opt, [data-prev], [data-back], [data-reset]");
+    if (!el || el.disabled) return;
+    if (el.hasAttribute("data-reset")) return reset();
+    cancelDwell();
+    activate(el);
+  });
+
+  /* ---------------- Hover-to-choose ----------------
+     A dwell starts only when the pointer actually moves over a target,
+     so a new question appearing under a resting cursor never self-selects. */
+  let dwell = null;   // {el, start, ms, raf}
+  function cancelDwell() {
+    if (!dwell) return;
+    cancelAnimationFrame(dwell.raf);
+    dwell.el.classList.remove("dwell");
+    dwell.el.style.removeProperty("--p");
+    const c = dwell.el.querySelector(".count"); if (c) c.textContent = "";
+    dwell = null;
+  }
+  function startDwell(el) {
+    const ms = el.dataset.dwell === "select" ? SELECT_MS : +el.dataset.dwell;
+    if (!ms) return;
+    dwell = { el, start: performance.now(), ms, raf: 0 };
+    el.classList.add("dwell");
+    const tick = now => {
+      if (!dwell || dwell.el !== el) return;
+      const p = Math.min(1, (now - dwell.start) / ms);
+      el.style.setProperty("--p", p.toFixed(3));
+      const c = el.querySelector(".count");
+      if (c) c.textContent = `${Math.ceil((ms - (now - dwell.start)) / 1000)} s`;
+      if (p >= 1) { cancelDwell(); activate(el); return; }
+      dwell.raf = requestAnimationFrame(tick);
+    };
+    dwell.raf = requestAnimationFrame(tick);
+  }
+  path.addEventListener("pointermove", e => {
+    if (e.pointerType === "touch") return;
+    const el = e.target.closest(".opt, [data-prev], [data-back]");
+    const onTerm = e.target.closest(".term");
+    if (!el || el.disabled || onTerm) { if (dwell && (!el || onTerm || dwell.el !== el)) cancelDwell(); return; }
+    if (dwell && dwell.el === el) return;
+    cancelDwell();
+    startDwell(el);
+  });
+  path.addEventListener("pointerleave", cancelDwell);
+  path.addEventListener("pointerout", e => {
+    if (dwell && !dwell.el.contains(e.relatedTarget)) cancelDwell();
+  });
+  window.addEventListener("blur", cancelDwell);
+
+  /* ---------------- Preferences ---------------- */
+  const store = {
+    get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+    set: (k, v) => { try { localStorage.setItem(k, v); } catch { /* storage unavailable */ } }
+  };
+  const speed = document.getElementById("speed");
+  const savedSpeed = store.get("dwellMs");
+  if (savedSpeed !== null && [...speed.options].some(o => o.value === savedSpeed)) speed.value = savedSpeed;
+  SELECT_MS = +speed.value;
+  speed.addEventListener("change", () => { SELECT_MS = +speed.value; store.set("dwellMs", speed.value); });
+
+  const themeBtn = document.getElementById("theme");
+  function applyTheme(t) {
+    document.documentElement.dataset.theme = t;
+    themeBtn.textContent = t === "dark" ? "Light mode" : "Dark mode";
+    themeBtn.setAttribute("aria-pressed", t === "dark");
+  }
+  applyTheme(store.get("theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"));
+  themeBtn.addEventListener("click", () => {
+    const t = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(t); store.set("theme", t);
+  });
+
+  render();
+})();
+</script>
+</body>
+</html>
