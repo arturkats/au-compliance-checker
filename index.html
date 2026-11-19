@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Does CPS 230 or CPS 234 apply to you? | APRA applicability checker</title>
-<meta name="description" content="Answer a few questions to find out whether APRA's operational risk (CPS 230) and information security (CPS 234) standards apply to your organisation, with paragraph references.">
+<title>Which privacy and security rules apply to you? | Australian compliance checker</title>
+<meta name="description" content="Answer a few questions to find out whether the Privacy Act 1988 and APRA's CPS 230 and CPS 234 apply to your organisation, with section and paragraph references.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
@@ -159,6 +159,8 @@
     background: var(--surface); border: 1.5px solid var(--line); border-radius: 999px;
     padding: 0.45rem 1.1rem; cursor: pointer;
   }
+  .switch { margin: 1.2rem 0 0; }
+  .switch .ctl { border-color: var(--gum); }
   .ctl:disabled { opacity: 0.45; cursor: default; }
   .ctl.reset { color: var(--muted); }
 
@@ -237,8 +239,8 @@
 <div class="page">
   <header class="top">
     <div>
-      <h1>Does CPS 230 or CPS 234 apply to you?</h1>
-      <p class="lede">Answer a few questions about your organisation. You'll see whether APRA's operational risk standard (CPS 230) and information security standard (CPS 234) apply, which paragraphs decide it, and what they require.</p>
+      <h1>Which privacy and security rules apply to you?</h1>
+      <p class="lede">Answer a few questions about your organisation. You'll see whether the Privacy Act 1988, or APRA's operational risk and information security standards (CPS 230 and CPS 234), apply to you, which provisions decide it, and what they require.</p>
     </div>
     <button class="theme-toggle" id="theme" type="button" aria-pressed="false">Dark mode</button>
   </header>
@@ -258,9 +260,9 @@
   <div class="sr" aria-live="polite" id="live"></div>
 
   <footer>
-    <p>Educational tool, not legal advice. Confirm your position with the standards themselves, APRA's guidance or a qualified adviser.</p>
-    <p>Sources: <a href="https://www.legislation.gov.au/F2026L00475/latest/text">Prudential Standard CPS 230 Operational Risk Management (July 2026, F2026L00475)</a> and <a href="https://www.legislation.gov.au/F2018L01745/latest/text">Prudential Standard CPS 234 Information Security (July 2019, F2018L01745)</a>. Paragraph numbers follow these versions.</p>
-    <p>Built by Artur Kats. Coming next: Privacy Act, Essential Eight, ISO/IEC 27001, ISO 31000, NIST CSF 2.0 and PCI DSS.</p>
+    <p>Educational tool, not legal advice. Confirm your position with the legislation itself, guidance from APRA or the OAIC, or a qualified adviser.</p>
+    <p>Sources: <a href="https://www.legislation.gov.au/C2004A03712/latest/text">Privacy Act 1988 (Compilation No. 104, 4 June 2026, C2026C00227)</a>, <a href="https://www.legislation.gov.au/F2026L00475/latest/text">Prudential Standard CPS 230 Operational Risk Management (July 2026, F2026L00475)</a> and <a href="https://www.legislation.gov.au/F2018L01745/latest/text">Prudential Standard CPS 234 Information Security (July 2019, F2018L01745)</a>. Section and paragraph numbers follow these versions.</p>
+    <p>Built by Artur Kats. Coming next: Essential Eight, ISO/IEC 27001, ISO 31000, NIST CSF 2.0 and PCI DSS.</p>
   </footer>
 </div>
 
@@ -283,7 +285,12 @@
     "RSE licensee": "Registrable superannuation entity licensee: the trustee that runs a regulated super fund, licensed under the SIS Act.",
     "Head of a group": "The parent APRA-regulated entity of a Level 2 group (a banking or general insurance group) or a Level 3 group (a conglomerate group), as defined in CPS 001. For CPS 230, 'group' also covers a super trustee's connected entities and related bodies corporate (footnote 3).",
     "material service provider": "A service provider your client relies on to undertake a critical operation, or one that exposes it to material operational risk. CPS 230 para 48. Examples in para 49 include core technology services, fund administration, claims management, risk management and internal audit.",
-    "information assets": "Information and information technology, including software, hardware and data, in soft and hard copy. CPS 234 para 12."
+    "information assets": "Information and information technology, including software, hardware and data, in soft and hard copy. CPS 234 para 12.",
+    "Australian link": "An organisation has an Australian link if it's an Australian citizen or permanent resident, or a company, partnership, trust or association formed or managed in Australia. An overseas organisation also has one if it carries on business in Australia. Privacy Act s 5B(2)–(3).",
+    "annual turnover": "Total business income earned in the year: sales, commissions, repair and service income, rent, interest, royalties, dividends, government subsidies and other operating income. It's income, not profit. Privacy Act s 6DA.",
+    "personal information": "Information or an opinion about an identified individual, or an individual who is reasonably identifiable, whether true or not and whether recorded or not. Privacy Act s 6(1).",
+    "APP entity": "An Australian Government agency or an organisation covered by the Privacy Act. APP entities must follow the 13 Australian Privacy Principles. Privacy Act s 6(1).",
+    "employee record": "A record of personal information about an employee's employment, such as engagement, training, discipline, performance, pay, leave and health. The exemption covers current and former employees, not job applicants or contractors. Privacy Act s 6(1) and s 7B(3)."
   };
   const term = (key, label) =>
     `<button type="button" class="term" aria-describedby="tip-${slug(key)}">${label || key}<span class="tip" role="tooltip" id="tip-${slug(key)}">${TERMS[key]}</span></button>`;
@@ -299,6 +306,115 @@
   };
 
   const Q = {
+    module: {
+      short: "What you're checking",
+      title: () => "What would you like to check?",
+      help: "If you're not sure, start with the Privacy Act. It applies to far more organisations.",
+      cite: "You can check the other one afterwards.",
+      options: [
+        { v: "privacy", t: "The Privacy Act 1988", s: "How you must handle personal information. Covers most organisations with turnover over $3 million, Australian Government agencies and some small businesses." },
+        { v: "apra", t: "APRA's CPS 230 and CPS 234", s: "Operational risk and information security for banks, insurers and super funds, and the companies that serve them." }
+      ]
+    },
+    p_type: {
+      short: "Type of organisation",
+      title: () => "Which best describes your organisation?",
+      help: () => `The Privacy Act protects ${term("personal information")}.`,
+      cite: "Privacy Act s 6(1) (agency), s 6C (organisation), s 7B(1) and s 16 (personal affairs).",
+      options: [
+        { v: "business", t: "A business or not-for-profit", s: "A company, partnership, trust, sole trader or association" },
+        { v: "cth", t: "An Australian Government agency", s: "A Commonwealth department, authority or office holder" },
+        { v: "state", t: "A state, territory or local government body", s: "For example a state department or a local council" },
+        { v: "person", t: "An individual, in a personal capacity", s: "Not running a business" }
+      ]
+    },
+    p_link: {
+      short: "Australian link",
+      title: () => `Does your organisation have an ${term("Australian link")}?`,
+      cite: "Privacy Act s 5B(1A)–(3).",
+      options: [
+        { v: "au", t: "Yes, it's Australian", s: "Formed, incorporated or managed in Australia, or an Australian citizen or permanent resident" },
+        { v: "foreignBiz", t: "It's based overseas, but carries on business in Australia" },
+        { v: "foreignNo", t: "It's based overseas, with no business in Australia" }
+      ]
+    },
+    p_turnover: {
+      short: "Annual turnover",
+      title: () => `Has your ${term("annual turnover")} been more than $3 million in any financial year?`,
+      help: "Count every year since the business started. A business in its first year uses this year's turnover.",
+      cite: "Privacy Act s 6D(1), (2) and (4)(a), and s 6DA.",
+      options: [
+        { v: "over", t: "Yes, more than $3 million in at least one year" },
+        { v: "under", t: "No, $3 million or less every year" }
+      ]
+    },
+    p_trigger: {
+      short: "Small business exceptions",
+      title: () => "Does your business do any of these?",
+      help: "Some small businesses are covered whatever their turnover. If more than one applies, choose the first.",
+      cite: "Privacy Act s 6D(4)(b)–(f), (5)–(9).",
+      options: [
+        { v: "health", t: "Provides a health service and holds health information", s: "For example a medical, dental, pharmacy or allied health practice" },
+        { v: "trade", t: "Buys or sells personal information", s: "Discloses it for a benefit, or pays to collect it, without consent or legal authority" },
+        { v: "cthContract", t: "Works under an Australian Government contract", s: "As a contractor or subcontractor" },
+        { v: "credit", t: "Is a credit reporting body" },
+        { v: "related", t: "Is related to a larger company", s: "A related body corporate of a company that isn't a small business" },
+        { v: "none", t: "None of these" }
+      ]
+    },
+    p_special: {
+      short: "Other ways a small business is covered",
+      title: () => "Does any of these apply?",
+      cite: "Privacy Act s 6E(1A)–(1D) and s 6EA.",
+      options: [
+        { v: "aml", t: "It's an AML/CTF reporting entity", s: "Including many lawyers, accountants and real estate agents since 1 July 2026" },
+        { v: "union", t: "It's a registered employee association, or a protected action ballot agent" },
+        { v: "cdr", t: "It's accredited under the Consumer Data Right" },
+        { v: "optin", t: "It has opted in by registering with the Information Commissioner" },
+        { v: "none", t: "None of these" }
+      ]
+    },
+    p_tfn: {
+      short: "Tax file numbers",
+      title: () => "Do you collect tax file numbers, for example from employees?",
+      help: "Tax file number rules apply to every business that holds them, whatever its size.",
+      cite: "Privacy Act ss 17–18 and s 26WE(1)(d).",
+      options: [
+        { v: "yes", t: "Yes" },
+        { v: "no", t: "No" }
+      ]
+    },
+    p_people: {
+      short: "Whose information",
+      title: () => "Whose personal information do you handle?",
+      cite: "Privacy Act s 7B(3).",
+      help: () => `Records about your own staff can fall under the ${term("employee record", "employee records")} exemption.`,
+      options: [
+        { v: "public", t: "Customers, clients or members of the public", s: "And possibly staff as well" },
+        { v: "staff", t: "Only records about my current and former employees" }
+      ]
+    },
+    p_adm: {
+      short: "Automated decisions",
+      title: () => "Do you use computer programs to make, or substantially help make, decisions that could significantly affect people?",
+      help: "For example credit, insurance, hiring or eligibility decisions made or shaped by software or AI, even with a person involved.",
+      cite: "APPs 1.7–1.8, added by the Privacy and Other Legislation Amendment Act 2024 (Sch 1 items 87–89), commencing 10 December 2026.",
+      options: [
+        { v: "yes", t: "Yes" },
+        { v: "no", t: "No" },
+        { v: "unsure", t: "Not sure" }
+      ]
+    },
+    p_kids: {
+      short: "Children online",
+      title: () => "Do you provide an online service that children are likely to use?",
+      help: "For example an app, website, game or social platform.",
+      cite: "Children's Online Privacy Code, which the Information Commissioner must register by 10 December 2026.",
+      options: [
+        { v: "yes", t: "Yes" },
+        { v: "no", t: "No" }
+      ]
+    },
     sector: {
       short: "Type of organisation",
       title: () => `Is your organisation ${term("APRA-regulated", "regulated by APRA")}? If so, which kind?`,
@@ -397,6 +513,47 @@
 
   /* The order of questions depends on earlier answers */
   function nextQuestion(a) {
+    if (!("module" in a)) return "module";
+    return a.module === "privacy" ? privacyNext(a) : apraNext(a);
+  }
+
+  function privacyCoverage(a) {
+    // returns "full", "partial" or "none" once enough is known, else undefined
+    if (a.p_type === "cth") return "full";
+    if (a.p_type === "state" || a.p_type === "person") return "none";
+    if (a.p_link === "foreignNo") return "none";
+    if (a.p_turnover === "over") return "full";
+    if (a.p_trigger === "cthContract") return "partial";
+    if (a.p_trigger && a.p_trigger !== "none") return "full";
+    if (a.p_special === "optin") return "full";
+    if (a.p_special && a.p_special !== "none") return "partial";
+    if (a.p_special === "none") return "none";
+    return undefined;
+  }
+
+  function privacyNext(a) {
+    if (!("p_type" in a)) return "p_type";
+    if (a.p_type === "business") {
+      if (!("p_link" in a)) return "p_link";
+      if (a.p_link === "foreignNo") return null;
+      if (!("p_turnover" in a)) return "p_turnover";
+      if (a.p_turnover === "under") {
+        if (!("p_trigger" in a)) return "p_trigger";
+        if (a.p_trigger === "none") {
+          if (!("p_special" in a)) return "p_special";
+          if (a.p_special === "none") return ("p_tfn" in a) ? null : "p_tfn";
+        }
+      }
+      if (!("p_people" in a)) return "p_people";
+    }
+    if (a.p_type === "business" || a.p_type === "cth") {
+      if (!("p_adm" in a)) return "p_adm";
+      if (!("p_kids" in a)) return "p_kids";
+    }
+    return null;
+  }
+
+  function apraNext(a) {
     if (!("sector" in a)) return "sector";
     if (a.sector === "none") {
       if (!("provider" in a)) return "provider";
@@ -528,8 +685,134 @@
   }
 
   function resultHTML(a) {
+    if (a.module === "privacy") return privacyResult(a);
     if (a.sector !== "none") return regulatedResult(a);
     return providerResult(a);
+  }
+
+  const switchBtn = (to, label) =>
+    `<p class="switch"><button type="button" class="ctl" data-switch="${to}" data-dwell="${BACK_MS}">${label}</button></p>`;
+
+  function appsSummary() {
+    return `<details><summary>What the Australian Privacy Principles require</summary>
+      <ul>
+        ${li("Manage personal information openly, with a clear, up-to-date privacy policy.", "APP 1")}
+        ${li("Let people deal with you anonymously or under a pseudonym where practicable.", "APP 2")}
+        ${li("Collect only what you need, by fair means, and get consent for sensitive information such as health details.", "APPs 3–4")}
+        ${li("Tell people what you're collecting, why, and who you'll share it with.", "APP 5")}
+        ${li("Use and disclose it only for the purpose you collected it, with limited exceptions.", "APP 6")}
+        ${li("Give people a simple way to opt out of direct marketing.", "APP 7")}
+        ${li("Before sending it overseas, take reasonable steps to make sure the recipient protects it. You stay accountable for what the recipient does.", "APP 8, s 16C")}
+        ${li("Don't adopt government identifiers, such as Medicare numbers, as your own.", "APP 9")}
+        ${li("Keep it accurate and up to date.", "APP 10")}
+        ${li("Protect it with reasonable steps, including technical and organisational measures, and destroy or de-identify it when it's no longer needed.", "APP 11")}
+        ${li("Give people access to their information and correct it on request.", "APPs 12–13")}
+      </ul>
+      <h4>Penalties <span class="ref">ss 13G, 13H, 13K</span></h4>
+      <p>For a serious interference with privacy, a company faces up to the greatest of $50 million, three times the benefit obtained, or 30% of adjusted turnover. Less serious breaches carry up to 2,000 penalty units, and some administrative breaches, such as a missing privacy policy, can attract infringement notices.</p>
+    </details>`;
+  }
+
+  function privacyResult(a) {
+    const cov = privacyCoverage(a);
+    const reasons = [];
+    let status, heading, cls = "";
+
+    if (a.p_type === "cth") {
+      reasons.push(li("Australian Government agencies are APP entities.", "s 6(1)"));
+    } else if (a.p_type === "state") {
+      reasons.push(li("State, territory and local government bodies aren't organisations under the Act, unless regulations prescribe them.", "ss 6C(1), 6F"));
+    } else if (a.p_type === "person") {
+      reasons.push(li("Acts done in a personal capacity, outside any business, are exempt.", "ss 7B(1), 16"));
+    } else if (a.p_link === "foreignNo") {
+      reasons.push(li("The Act reaches acts done outside Australia only by organisations with an Australian link. Without one, it's unlikely to reach what you do overseas.", "s 5B(1A)–(3)"));
+    } else {
+      if (a.p_link === "foreignBiz") reasons.push(li("You carry on business in Australia, which gives you an Australian link, so the Act also covers what you do overseas.", "s 5B(1A), (3)"));
+      if (a.p_turnover === "over") reasons.push(li("Your turnover has exceeded $3 million, so you're not a small business operator.", "s 6D(4)(a)"));
+      if (a.p_turnover === "under") reasons.push(li("Your turnover has stayed at $3 million or less, so you start as a small business operator.", "s 6D(1)–(3)"));
+      const trig = {
+        health: ["You provide a health service and hold health information, so the small business exemption doesn't apply.", "s 6D(4)(b)"],
+        trade: ["You trade in personal information, so the small business exemption doesn't apply.", "s 6D(4)(c)–(d)"],
+        cthContract: ["As a Commonwealth contractor you're covered, but only for what you do to meet the contract. Your other activities stay exempt.", "ss 6D(4)(e), 7B(2)"],
+        credit: ["Credit reporting bodies are always covered, and Part IIIA's credit reporting rules also apply to you.", "s 6D(4)(f)"],
+        related: ["You're related to a company that isn't a small business, so you aren't one either.", "s 6D(9)"]
+      }[a.p_trigger];
+      if (trig) reasons.push(li(trig[0], trig[1]));
+      const spec = {
+        aml: ["As an AML/CTF reporting entity, you're covered for activities connected with your AML/CTF obligations.", "s 6E(1A)"],
+        union: ["You're covered as if you were an organisation.", "s 6E(1B)–(1C)"],
+        cdr: ["As an accredited Consumer Data Right participant, you're covered for personal information that isn't CDR data.", "s 6E(1D)"],
+        optin: ["You've chosen to be treated as an organisation while your registration stands.", "s 6EA"]
+      }[a.p_special];
+      if (spec) reasons.push(li(spec[0], spec[1]));
+      if (a.p_special === "none") reasons.push(li("None of the exceptions apply, so the small business exemption covers you.", "ss 6C(1), 6D"));
+    }
+
+    if (cov === "full") { status = "Applies"; heading = "The Privacy Act applies to you."; }
+    else if (cov === "partial") { status = "Applies to some activities"; heading = "The Privacy Act applies to part of what you do."; cls = "indirect"; }
+    else { status = a.p_link === "foreignNo" ? "Unlikely to apply" : "Doesn't apply"; heading = "The Australian Privacy Principles don't apply to you."; cls = "no"; }
+
+    const notes = [];
+    if (a.p_people === "staff" && cov !== "none") notes.push("Handling records about your own current and former employees is exempt when it's directly related to the employment relationship (s 7B(3)). The exemption doesn't extend to job applicants or contractors, or to anyone else's information.");
+    if (a.p_adm === "yes") notes.push("From 10 December 2026, your privacy policy must explain the kinds of personal information your computer programs use and the kinds of decisions they make or substantially help make (APPs 1.7–1.8). A person being involved doesn't take a decision outside the rule.");
+    if (a.p_adm === "unsure") notes.push("Check before 10 December 2026: if software or AI makes, or substantially helps make, decisions that significantly affect people, your privacy policy must describe them (APPs 1.7–1.8).");
+    if (a.p_kids === "yes") notes.push("The Children's Online Privacy Code is due to be registered by 10 December 2026. Check its commencement date and requirements for online services likely to be used by children.");
+    if (a.p_type === "state") notes.push("State laws fill this gap. In Victoria, the Privacy and Data Protection Act 2014 (Vic) covers the state public sector, including local councils.");
+    if (cov === "none" && a.p_type === "business" && a.p_link !== "foreignNo") notes.push("Proposed reforms would narrow or remove the small business exemption. They aren't law yet. If you handle health information in Victoria, also check the Health Records Act 2001 (Vic).");
+    if (cov === "none" && a.p_type === "business" && a.p_link !== "foreignNo") notes.push("Many small businesses comply voluntarily, or opt in under s 6EA, because larger clients require it in their contracts.");
+
+    const card1 = `<article class="verdict ${cls}">
+        <h3>Australian Privacy Principles</h3><p class="std">Privacy Act 1988, s 15 and Schedule 1</p>
+        <span class="status">${status}</span>
+        <ul>${reasons.join("")}</ul>
+        ${cov !== "none" ? appsSummary() : ""}
+      </article>`;
+
+    let ndb;
+    if (cov === "full" || cov === "partial") {
+      ndb = `<article class="verdict ${cov === "partial" ? "indirect" : ""}">
+        <h3>Notifiable data breaches</h3><p class="std">Privacy Act 1988, Part IIIC</p>
+        <span class="status">${cov === "partial" ? "Applies to the covered activities" : "Applies"}</span>
+        <ul>
+          ${li("An eligible data breach is unauthorised access, disclosure or loss of personal information that a reasonable person would conclude is likely to cause serious harm.", "s 26WE")}
+          ${li("If you suspect one, assess it quickly, and take all reasonable steps to finish within 30 days.", "s 26WH")}
+          ${li("If it is one, notify the Information Commissioner and the affected individuals as soon as practicable.", "ss 26WK–26WL")}
+        </ul></article>`;
+    } else if (a.p_tfn === "yes") {
+      ndb = `<article class="verdict indirect">
+        <h3>Notifiable data breaches</h3><p class="std">Privacy Act 1988, Part IIIC</p>
+        <span class="status">Applies to tax file numbers</span>
+        <ul>
+          ${li("Even as a small business, you must follow the tax file number rules, and a breach of tax file number information can be an eligible data breach.", "ss 18, 26WE(1)(d)")}
+          ${li("If one is likely to cause serious harm, notify the Information Commissioner and the affected people as soon as practicable.", "ss 26WH–26WL")}
+        </ul></article>`;
+    } else {
+      ndb = `<article class="verdict no">
+        <h3>Notifiable data breaches</h3><p class="std">Privacy Act 1988, Part IIIC</p>
+        <span class="status">Doesn't apply</span>
+        <ul>${li("The scheme covers APP entities, credit reporting bodies, credit providers and tax file number recipients.", "s 26WE(1)")}</ul></article>`;
+    }
+
+    const gov = a.p_type === "cth" || a.p_type === "state";
+    const tort = `<article class="verdict indirect">
+        <h3>Serious invasions of privacy</h3><p class="std">Privacy Act 1988, Schedule 2, since 10 June 2025</p>
+        <span class="status">${gov ? "Limited for government bodies" : "Applies to everyone"}</span>
+        <p>${gov
+          ? "Government agencies and their staff are exempt when they act in good faith in performing their functions or exercising their powers (Sch 2 cl 16–16A). Outside that, individuals can sue them like anyone else."
+          : "Separately from the Australian Privacy Principles, an individual can sue anyone who seriously invades their privacy, whatever their size or type."}</p>
+        <ul>
+          ${li("The invasion must intrude on the person's seclusion or misuse information about them, where they'd reasonably expect privacy.", "Sch 2 cl 7(1)(a)–(b)")}
+          ${li("It must be intentional or reckless, and serious, and the person's privacy must outweigh any competing public interest. No proof of damage is needed.", "Sch 2 cl 7(1)(c)–(e), 7(2)")}
+          ${li("Exemptions cover journalists in some circumstances, enforcement and intelligence bodies, and people under 18.", "Sch 2 cl 15–18")}
+        </ul></article>`;
+
+    return `<section aria-labelledby="rh">
+      <h2 class="result-head" id="rh" tabindex="-1">${heading}</h2>
+      <p class="help">Here's the reasoning, section by section. The Act has three separate parts that can reach you.</p>
+      <div class="verdicts">${card1}${ndb}${tort}</div>
+      ${notes.map(n => `<p class="note">${n}</p>`).join("")}
+      ${switchBtn("apra", "Also check APRA's CPS 230 and CPS 234")}
+    </section>`;
   }
 
   function regulatedResult(a) {
@@ -580,6 +863,8 @@
         </article>
       </div>
       ${caution.map(c => `<p class="note">${c}</p>`).join("")}
+      <p class="note">APRA-regulated organisations are almost always covered by the Privacy Act as well.</p>
+      ${switchBtn("privacy", "Check the Privacy Act next")}
     </section>`;
   }
 
@@ -594,7 +879,8 @@
           <article class="verdict no"><h3>CPS 234</h3><p class="std">Information Security</p><span class="status">Doesn't apply</span>
             <ul>${li("You're not one of the organisations it covers.", "para 2")}</ul></article>
         </div>
-        <p class="note">Other rules may still apply, such as the Privacy Act 1988, PCI DSS if you take card payments, and the Essential Eight as a security baseline. They're coming to this checker next.</p>
+        <p class="note">Other rules may still apply, such as the Privacy Act 1988, PCI DSS if you take card payments, and the Essential Eight as a security baseline.</p>
+        ${switchBtn("privacy", "Check the Privacy Act next")}
       </section>`;
     }
 
@@ -654,6 +940,7 @@
       <h2 class="result-head" id="rh" tabindex="-1">${heading}</h2>
       <p class="help">CPS 230 and CPS 234 apply only to APRA-regulated organisations (para 2 of each). Service providers are affected through the contracts and checks their clients must put in place.</p>
       <div class="verdicts">${c230}${c234}</div>
+      ${switchBtn("privacy", "Check the Privacy Act next")}
     </section>`;
   }
 
@@ -662,17 +949,19 @@
   function goBack() { if (history.length) { history.pop(); render(); } }
   function backTo(i) { history = history.slice(0, i); render(); }
   function reset() { history = []; render(); document.getElementById("path").scrollIntoView({ block: "start" }); }
+  function switchTo(m) { history = [{ q: "module", v: m }]; render(); }
 
   function activate(el) {
     if (el.matches(".opt")) choose(el.dataset.q, el.dataset.v);
     else if (el.hasAttribute("data-prev")) goBack();
     else if (el.hasAttribute("data-back")) backTo(+el.dataset.back);
+    else if (el.hasAttribute("data-switch")) switchTo(el.dataset.switch);
   }
 
   /* Clicks, taps and keyboard (Enter/Space on buttons fire click) */
   path.addEventListener("click", e => {
     if (e.target.closest(".term")) return;           // reading a definition never chooses an answer
-    const el = e.target.closest(".opt, [data-prev], [data-back], [data-reset]");
+    const el = e.target.closest(".opt, [data-prev], [data-back], [data-reset], [data-switch]");
     if (!el || el.disabled) return;
     if (el.hasAttribute("data-reset")) return reset();
     cancelDwell();
@@ -709,7 +998,7 @@
   }
   path.addEventListener("pointermove", e => {
     if (e.pointerType === "touch") return;
-    const el = e.target.closest(".opt, [data-prev], [data-back]");
+    const el = e.target.closest(".opt, [data-prev], [data-back], [data-switch]");
     const onTerm = e.target.closest(".term");
     if (!el || el.disabled || onTerm) { if (dwell && (!el || onTerm || dwell.el !== el)) cancelDwell(); return; }
     if (dwell && dwell.el === el) return;
